@@ -1,0 +1,1 @@
+   @include('templates.formulario.select', ['select'=>'vendedor_id', 'data'=>$list_Vendedores,'attributes' => ['class' => 'form-control form-control-sm', 'title' => "Pedido pertencente ao Vendedor?",'required' => "required"]])

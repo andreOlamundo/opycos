@@ -1,0 +1,1 @@
+$products = Produto::where('ativo', '=', 's')->orderBy('prod_desc', 'asc')->paginate(7);

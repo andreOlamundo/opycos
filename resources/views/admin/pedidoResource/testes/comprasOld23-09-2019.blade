@@ -1,0 +1,367 @@
+@extends('templates.admin-login')
+
+@section('css-view')
+@endsection
+
+@section('js-view')
+@endsection
+
+@section('templates.menu-superior-admin')
+@endsection
+
+@section('conteudo-view')  
+<div id="line-one">
+  <div id="line-one">
+    <div class="container">   
+     
+      <h2><b>Listagem de pedidos</b></h2>
+      
+      <div class="row">
+        <div class="col-md-12">
+       <!--   <ol class="breadcrumb" style="margin-bottom: 10px;">
+            <li class="active">Pedidos</li>
+            <li><a href="{{route('index')}}" id="btn" style="text-decoration: none"><b>Cadastro</b></a></li>
+          </ol> -->
+
+          @if (Session::has('mensagem-sucesso'))
+          <div class="alert alert-success alert-dismissible">
+            <strong>{{ Session::get('mensagem-sucesso') }}</strong>
+            <a href="#" class="close" 
+            data-dismiss="alert"
+            aria-label="close">&times;</a>
+          </div>
+          @endif
+          @if (Session::has('mensagem-falha'))
+          <div class="alert alert-danger alert-dismissible">
+            <strong>{{ Session::get('mensagem-falha') }}</strong>
+            <a href="#" class="close" 
+            data-dismiss="alert"
+            aria-label="close">&times;</a>
+          </div>
+          @endif
+
+           <form method="POST" action="{{route('Pedido.search')}}"> 
+            {{ csrf_field() }}
+            <div class="card-panel">
+             <div class="row">
+               <div class="col-md-4">  
+                <div class="input-field">   
+                  <select id="cliente" onchange="submit()" name="id_cliente">
+                    @foreach($dadosClientes as $dc)
+                    <option></option>
+                    <option value="{{ $dc->id }}">{{ $dc->id }}. {{$dc->name}}. Cel:{{$dc->cel}}. Doc.{{$dc->cpf}} {{$dc->cnpj}}</option>
+
+                     @endforeach     
+                   </select>
+                   <label for="id_cliente" style="font-size: 15px; margin-top: -30px;">Escolha um cliente para pesquisa </label>
+                 </div><br>
+                 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+                 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>      
+                 <script type="text/javascript">
+                  $("#cliente").select2({
+                    placeholder:'---Selecione o Cliente---'
+                  });
+                </script>  
+
+                <div class="input-field">   
+                  <select id="vendedor" onchange="submit()" name="vendedor_id">
+                    @foreach($dadosVendedores as $dv)
+                    <option></option>
+                    <option value="{{ $dv->id }}">{{ $dv->id }}. {{$dv->name}} </option>
+
+                     @endforeach     
+                   </select>
+                   <label for="vendedor" style="font-size: 15px; margin-top: -30px;">Escolha o representante comercial</label>
+                 </div>
+                 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+                 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>      
+                 <script type="text/javascript">
+                  $("#vendedor").select2({
+                    placeholder:'---Selecione o Vendedor---'
+                  });
+                </script>        
+
+     
+      
+          
+                
+
+              </div>
+
+
+              <a href="{{route('index')}}" 
+              class="btn-floating btn-large waves-effect waves-light btn-primary pull-right" title="Novo Pedido">
+              <i class="material-icons">add</i></a>
+              <a href="{{route('pedido.allcompras')}}"             
+                    title="Limpar Pesquisa" class="btn waves-effect pull-center"><i class="fa fa-eraser"></i></a>
+
+                    <div class="col-md-3">
+                   <div class="collection">        
+        <span class="collection-item active" style="position: relative;">Total Produtos
+        </span>
+        <span class="collection-item" title="R$ {{ number_format($total_preco, 2, ',', '.') }}"  style="position: relative;">R$ {{ number_format($total_preco, 2, ',', '.') }}
+        </span>
+       
+                  </div>               
+
+              </div>
+            </div>
+            
+          </div> 
+       
+      </form>
+        </div>
+
+
+           <div class="col-md-12">           
+            
+            <div class="table-responsive">                 
+              <table class="table table-striped table-bordered table-condensed table-hover" >
+                <thead>
+                  <tr class="warning"> 
+
+                    <th id="center">Código</th>
+                    <th id="center">Cliente</th>
+                    <th id="center">Data de Registro</th> 
+                    <th id="center">Status Frete</th> 
+                     <th id="center">Status do Pedido</th> 
+                     <th id="center">Pagamento</th>
+                     <th id="center">Total Produtos</th> 
+                     <th id="center">Custo Frete</th>                      
+                    <th id="center">Total Geral</th>
+                    <th id="center" style=" width: 100px;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                 @foreach ($pedidos as $compra)
+                 <tr>
+                  
+                  <td title="{{ $compra->id }}" id="center">
+                    <span class="chip">{{ $compra->id }}</span>
+                  </td>
+                  <td title="Vendedor: {{ ($compra->Cliente->Vendedor->name) }}">
+                   {{ ($compra->Cliente->name) }}
+                 </td>
+                 <td title="{{ $compra->created_at->format('d/m/Y H:i') }}">{{ $compra->created_at->format('d/m/Y H:i') }}</td>  
+               
+
+                 <td title="Entrega: {{($compra->Cliente->endereço)}} {{($compra->Cliente->numero)}} {{($compra->Cliente->bairro)}} {{($compra->Cliente->cidade)}} {{($compra->Cliente->estado)}}  {{($compra->Cliente->cep)}}" >{{ $compra->Frete->status == 'AR' ? 'Aguandando Retirada' : '' }}{{ $compra->Frete->status == 'EC' ? 'Entrega Correios' : '' }}{{ $compra->Frete->status == 'EMB' ? 'Entrega Moto Boy' : '' }}</td>
+                 <td title="{{ $compra->status == 'RE' ? 'Reservado' : '' }} {{ $compra->status == 'AG' ? 'Alterado' : '' }} {{ $compra->status == 'FI' ? 'Finalizado' : '' }} {{ $compra->status == 'CA' ? 'Cancelado' : '' }} {{ $compra->updated_at->format('d/m/Y H:i') }}">{{ $compra->status == 'RE' ? 'Reservado' : '' }} {{ $compra->status == 'AG' ? 'Alterado' : '' }} {{ $compra->status == 'FI' ? 'Finalizado' : '' }} {{ $compra->status == 'CA' ? 'Cancelado' : '' }} {{ $compra->updated_at->format('d/m/Y H:i') }}</td> 
+                 <td title="{{ $compra->pagamento == 'D' ? 'Dinheiro' : '' }}">{{ $compra->pagamento == 'D' ? 'Dinheiro' : '' }}{{ $compra->pagamento == 'CC' ? 'Cartão de Crédito' : '' }}{{ $compra->pagamento == 'CD' ? 'Cartão de Débito' : '' }}{{ $compra->pagamento == 'BB' ? 'Boleto Bancário' : '' }}</td>         
+                 
+               
+
+                 @php
+                 $total_pedido = 0;
+                 @endphp
+                 @foreach ($compra->pedido_produtos_itens as $pedido_produto)
+
+                 @if ($compra->Frete->status == 'AR' && $compra->Frete->balcao == 'YPF' && empty($compra->nunReq))
+                 @php
+                 $total_produto = $compra->pedido_produtos_itens->sum('prod_preco_balcao'); 
+                 $total_pedido = $total_produto;
+                 @endphp
+
+
+                 @elseif (isset($compra->nunReq) && $compra->Frete->balcao == 'YPF' && $compra->Frete->status == 'AR' )
+                 @php
+                 $total_produto = $compra->valorReq; 
+                 $total_pedido = $total_produto;
+                 @endphp
+
+
+                 @elseif ($compra->Frete->status == 'AR' && $compra->Frete->balcao == 'YPJ')
+                 @php
+                 $total_produto = $compra->pedido_produtos_itens->sum('prod_preco_prof');
+                 $total_pedido = $total_produto;
+                 @endphp
+
+                 @elseif ($compra->Frete->status == 'EMB' && $compra->Frete->entrega == 'BPF')
+                 @foreach($valorFrete as $total_frete)
+                 @php
+                 $total_produto = $compra->pedido_produtos_itens->sum('prod_preco_padrao');
+                 $total_pedido = $total_frete->valor;
+                 $total_pedido += $total_produto;              
+                 @endphp
+                 @endforeach
+
+                @elseif ($compra->Frete->status == 'EMB' && $compra->Frete->entrega == 'BPJ')
+                 @foreach($valorFrete as $total_frete)
+                 @php                
+                 $total_produto = $compra->pedido_produtos_itens->sum('prod_preco_prof');                 
+                 $total_pedido = $total_frete->valor;
+                 $total_pedido += $total_produto;            
+                 @endphp
+                 @endforeach
+
+                 @elseif ($compra->Frete->status == 'EC' && $compra->Frete->entrega == 'CPF')
+                 @foreach($valorFreteC as $total_frete)
+                 @php                 
+                 $total_produto = $compra->pedido_produtos_itens->sum('prod_preco_padrao');                
+                 $total_pedido = $total_frete->valor;
+                 $total_pedido += $total_produto;
+                 @endphp
+                 @endforeach
+
+                 @else ($compra->Frete->status == 'EC' && $compra->Frete->entrega == 'CPJ')
+                 @foreach($valorFreteC as $total_frete)
+                 @php               
+                 $total_produto = $compra->pedido_produtos_itens->sum('prod_preco_prof');                
+                 $total_pedido = $total_frete->valor;
+                 $total_pedido += $total_produto;
+                 
+                 @endphp
+                 @endforeach
+
+
+                
+
+
+                 @endif
+                               
+                  @endforeach
+
+
+
+                 
+                
+                 @if ($compra->Frete->status == 'AR' && $compra->Frete->balcao == 'YPF' && empty($compra->nunReq) )
+                 @php
+                 $total_produto = $compra->pedido_produtos_itens->sum('prod_preco_balcao');
+                 @endphp   
+                <td>R$ {{ number_format($total_produto, 2, ',', '.') }}</td>  
+
+
+                 @elseif (isset($compra->nunReq) && $compra->Frete->balcao == 'YPF' && $compra->Frete->status == 'AR')
+                 @php
+                 $total_produto = $compra->valorReq;
+                 @endphp   
+                <td>R$ {{ number_format($total_produto, 2, ',', '.') }}</td>             
+               
+
+                 @elseif ($compra->Frete->status == 'AR' && $compra->Frete->balcao == 'YPJ')
+                 @php
+                 $total_produto = $compra->pedido_produtos_itens->sum('prod_preco_prof');
+                 @endphp 
+                  <td>R$ {{ number_format($total_produto, 2, ',', '.') }}</td>
+                
+
+                 @elseif ($compra->Frete->status == 'EMB' && $compra->Frete->entrega == 'BPF')                 
+                 @php
+                 $total_produto = $compra->pedido_produtos_itens->sum('prod_preco_padrao');
+                 @endphp               
+
+                 <td>R$ {{ number_format($total_produto, 2, ',', '.') }}</td>              
+
+                 @elseif ($compra->Frete->status == 'EMB' && $compra->Frete->entrega == 'BPJ')
+                
+                 @php
+                 $total_produto =$compra->pedido_produtos_itens->sum('prod_preco_prof'); 
+                 @endphp 
+                
+                  <td>R$ {{ number_format($total_produto, 2, ',', '.') }}</td>
+                 
+
+                 @elseif ($compra->Frete->status == 'EC' && $compra->Frete->entrega == 'CPF')
+               
+                 @php
+                 $total_produto =$compra->pedido_produtos_itens->sum('prod_preco_padrao'); 
+                 @endphp
+                
+                  <td>R$ {{ number_format($total_produto, 2, ',', '.') }}</td>
+                
+
+                 @else ($compra->Frete->status == 'EC' && $compra->Frete->entrega == 'CPJ')
+               
+                 @php
+                 $total_produto =$compra->pedido_produtos_itens->sum('prod_preco_prof'); 
+                 @endphp
+                 <td>R$ {{ number_format($total_produto, 2, ',', '.') }}</td>
+                    
+
+
+                @endif
+             
+
+
+
+                 <td>R$ {{ number_format($compra->Frete->valor, 2, ',', '.') }}</td>                 
+                 <td title="R$ {{ number_format($total_pedido, 2, ',', '.') }}">R$ {{ number_format($total_pedido, 2, ',', '.') }}</td>
+                 <td title="Ações" id="center">
+                  <a href="{{route('pedidos.edit', $compra->id)}}" 
+                   data-toggle="tooltip" 
+                   data-placement="top"
+                   title="Alterar" class="btn waves-effect amber"><i class="small material-icons">border_color</i></a>
+                   &nbsp;
+                   <form style="display: inline-block;" method="POST" action="{{route('pedidos.destroy', $compra->id)}}"data-toggle="tooltip" data-placement="top" title="Excluir" onsubmit="return confirm('Confirma exclusão?')">
+                   {{method_field('DELETE')}}{{ csrf_field() }}                                                
+                   <button type="submit" class="btn waves-effect deep-orange">
+                    <i class="fa fa-trash"></i>                                                    
+                  </button>
+                </form>
+              </td>
+
+   @endforeach
+       
+            </tr>
+          </tbody>
+          <tfoot>
+           
+            
+            
+            
+            
+           
+          </tfoot>
+        </table>
+
+       
+   
+  <!--      @forelse ($compras as $pedido)
+       <input type="hidden" name="pedido_id" value="{{ $pedido->id }}"/>
+   
+
+
+
+      @empty
+    <h5 id="center">
+        @if ($cancelados->count() > 0)
+        Neste momento não há nenhum pedido concluído.
+        @else
+        Você ainda não fez nenhum pedido.
+        @endif
+      </h5>
+      @endforelse-->
+    </div>
+     @forelse ($compras as $pedido)
+         <input type="hidden" name="pedido_id" value="{{ $pedido->id }}"/>
+           @empty
+            <h5 id="center">
+           Você ainda não fez nenhum pedido.</h5>
+           @endforelse
+
+    
+   </div>
+
+
+        <div class="row">
+          <div class="col-sm-5 pull-left">
+            <p class="text-cinza">{{$total}} Registros</p>
+          </div>
+          <div class="pull-right">
+            @if (isset($dataForm))
+            {!! $pedidos->appends($dataForm)->links() !!}
+            @else
+            {!! $pedidos->links() !!}
+            @endif
+
+          </div>
+
+        </div>
+
+
+</div>
+</div>
+</div>
+</div>
+@endsection

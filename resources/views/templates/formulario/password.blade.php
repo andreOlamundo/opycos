@@ -1,0 +1,2 @@
+
+	{!! Form::password($input, $attributes) !!}

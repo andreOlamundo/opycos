@@ -1,0 +1,27 @@
+<script type="text/javascript">
+(function(document, $) {
+
+  $(function() {
+    $(document).on('click', '[disable-on-click], .disable-on-click', function() {
+      var disableText = this.getAttribute("data-disable-text") || 'Processing...';
+
+      if(this.form) {
+        this.form.submit();
+      }
+
+      this.disabled = true;
+
+      if(this.tagName === 'BUTTON') {
+        this.innerHTML = disableText;
+      } else if(this.tagName === 'INPUT') {
+        this.value = disableText;
+      }
+    });
+  });
+
+})(document, jQuery);
+
+</script>
+<button disable-on-click data-disable-text="Saving...">Click Me</button>
+<button class="disable-on-click">Click Me</button>
+<input type="submit" disable-on-click value="Click Me" />
